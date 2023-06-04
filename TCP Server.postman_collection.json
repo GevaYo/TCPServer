@@ -1,0 +1,187 @@
+{
+	"info": {
+		"_postman_id": "f9459382-cd27-4187-9a86-d25a74c99fa5",
+		"name": "TCP Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24929445"
+	},
+	"item": [
+		{
+			"name": "GET Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/HelloWorld.html?lang=fr",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"HelloWorld.html"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "fr"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "HEAD Request",
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/HelloWorld.html?lang=fr",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"HelloWorld.html"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "fr"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "THIS is A test!"
+				},
+				"url": {
+					"raw": "localhost:27015",
+					"host": [
+						"localhost"
+					],
+					"port": "27015"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT Request",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/newFile.html",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"newFile.html"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT Request Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/Hello.html",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"Hello.html"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/newFile.html",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"newFile.html"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Request Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015/new.html",
+					"host": [
+						"localhost"
+					],
+					"port": "27015",
+					"path": [
+						"new.html"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPTIONS Request",
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015",
+					"host": [
+						"localhost"
+					],
+					"port": "27015"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TRACE Request",
+			"request": {
+				"method": "TRACE",
+				"header": [],
+				"url": {
+					"raw": "localhost:27015",
+					"host": [
+						"localhost"
+					],
+					"port": "27015"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "INVALID Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

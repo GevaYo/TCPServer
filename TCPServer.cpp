@@ -424,7 +424,7 @@ string buildResponse(HTTPRequest requestInfo, string statusCode) // A response T
 	{
 		responseTemplate = VERSION + statusCode + "\r\n"
 			+ CONTENT_TYPE + "text/html" + "\r\n"
-			/*+ CONTENT_LEN + requestInfo.len*/
+			+ CONTENT_LEN + "0"
 			+ "\r\n\r\n";
 	}
 	else if (methodType == eRequestType::OPTIONS)

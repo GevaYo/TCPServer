@@ -30,7 +30,7 @@ void runServer()
 
 	if (SOCKET_ERROR == bind(listenSocket, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		cout << "Time Server: Error at bind(): " << WSAGetLastError() << endl;
+		cout << "TCP Server: Error at bind(): " << WSAGetLastError() << endl;
 		closesocket(listenSocket);
 		WSACleanup();
 		return;
@@ -38,7 +38,7 @@ void runServer()
 
 	if (SOCKET_ERROR == listen(listenSocket, 5))
 	{
-		cout << "Time Server: Error at listen(): " << WSAGetLastError() << endl;
+		cout << "TCP Server: Error at listen(): " << WSAGetLastError() << endl;
 		closesocket(listenSocket);
 		WSACleanup();
 		return;
@@ -67,7 +67,7 @@ void runServer()
 		nfd = select(0, &waitRecv, &waitSend, NULL, NULL);
 		if (nfd == SOCKET_ERROR)
 		{
-			cout << "Time Server: Error at select(): " << WSAGetLastError() << endl;
+			cout << "TCP Server: Error at select(): " << WSAGetLastError() << endl;
 			WSACleanup();
 			return;
 		}
@@ -107,7 +107,7 @@ void runServer()
 		}
 	}
 
-	cout << "Time Server: Closing Connection.\n";
+	cout << "TCP Server: Closing Connection.\n";
 	closesocket(listenSocket);
 	WSACleanup();
 }
@@ -146,10 +146,10 @@ void acceptConnection(int index)
 	SOCKET msgSocket = accept(id, (struct sockaddr*)&from, &fromLen);
 	if (INVALID_SOCKET == msgSocket)
 	{
-		cout << "Time Server: Error at accept(): " << WSAGetLastError() << endl;
+		cout << "TCP Server: Error at accept(): " << WSAGetLastError() << endl;
 		return;
 	}
-	cout << "Time Server: Client " << inet_ntoa(from.sin_addr) << ":" << ntohs(from.sin_port) << " is connected." << endl;
+	cout << "TCP Server: Client " << inet_ntoa(from.sin_addr) << ":" << ntohs(from.sin_port) << " is connected." << endl;
 
 	//
 	// Set the socket to be in non-blocking mode.
@@ -157,7 +157,7 @@ void acceptConnection(int index)
 	unsigned long flag = 1;
 	if (ioctlsocket(msgSocket, FIONBIO, &flag) != 0)
 	{
-		cout << "Time Server: Error at ioctlsocket(): " << WSAGetLastError() << endl;
+		cout << "TCP Server: Error at ioctlsocket(): " << WSAGetLastError() << endl;
 	}
 
 	if (addSocket(msgSocket, RECEIVE) == false)
@@ -207,22 +207,18 @@ void receiveMessage(int index)
 void sendMessage(int index)
 {
 	int bytesSent = 0;
-	//char sendBuff[255];
 
 	SOCKET msgSocket = sockets[index].id;
 	HTTPRequest requestInfo = parseInfoFromSocket(index);
 	string responseMsg = generateHTTPResponseFromSocket(requestInfo);
 	cout << "Response:\n" << responseMsg.data() << endl << "Received: " << responseMsg.length() << endl;
-
-	//bytesSent = send(msgSocket, sendBuff, (int)strlen(sendBuff), 0);
+	
 	bytesSent = send(msgSocket, responseMsg.data(), responseMsg.length(), 0);
 	if (SOCKET_ERROR == bytesSent)
 	{
-		cout << "Time Server: Error at send(): " << WSAGetLastError() << endl;
+		cout << "TCP Server: Error at send(): " << WSAGetLastError() << endl;
 		return;
 	}
-	//cout << "Time Server: Sent: " << bytesSent << "\\" << responseMsg.length() << " bytes of \" \n" << responseMsg << "\n";
-	//cout << "Time Server: Sent: " << bytesSent << "\\" << strlen(sendBuff) << " bytes of \"" << sendBuff << "\" message.\n";
 
 	sockets[index].send = IDLE;
 }
@@ -236,7 +232,7 @@ void checkForTimeoutAndHandle()
 		timeSinceLastRequest = difftime(time(nullptr), sockets[i].timeSinceRequestFullyReceived);
 		if (timeSinceLastRequest > TIMEOUT_MAX)
 		{
-			cout << "Request in socket: " << i << " Timed-out after: \n" << timeSinceLastRequest;
+			cout << "Request in socket: " << i << " Timed-out after: " << timeSinceLastRequest << "seconds.\n";
 			closesocket(sockets[i].id);
 			removeSocket(i);
 		}
@@ -270,7 +266,7 @@ HTTPRequest parseInfoFromSocket(int index)
 					queryParams = endPoint.substr(endPoint.find('?') + 1);
 					endPoint = endPoint.substr(0, endPoint.find('?'));
 					//receivedRequest.queryParams = fullRequest.substr(queryParamsStart, queryParamsEnd - queryParamsStart);
-					size_t langStart = receivedRequest.queryParams.find("lang=");
+					size_t langStart = queryParams.find("lang=");
 
 					if (langStart != string::npos) // There's 'lang='
 					{
@@ -353,7 +349,8 @@ string generateHTTPResponseFromSocket(HTTPRequest requestInfo)
 {
 	string response;
 
-	switch (requestInfo.type) {
+	switch (requestInfo.type)
+	{
 	case eRequestType::GET:
 	{
 		response = GETMethod(requestInfo);
@@ -400,56 +397,64 @@ string generateHTTPResponseFromSocket(HTTPRequest requestInfo)
 			+ body + "\r\n";
 		break;
 	}
-
-	return response;
 	}
+	return response;
 }
 
 string buildResponse(HTTPRequest requestInfo, string statusCode) // A response Template for all of the methods with little modifications
 {
 	string responseTemplate;
 	string body = requestInfo.body;
+	string bodyContentLength = to_string(body.length());
 	eRequestType methodType = requestInfo.type;
 
-	responseTemplate = VERSION + statusCode + "\r\n"
-		+ CONTENT_TYPE + "text/html" + "\r\n"
-		+ CONTENT_LEN + requestInfo.len + "\r\n";
+	/*responseTemplate = VERSION + statusCode + "\r\n"
+					 + CONTENT_TYPE + "text/html" + "\r\n"
+					 + CONTENT_LEN + requestInfo.len + "\r\n";*/
 
-	if (methodType == eRequestType::GET || methodType == eRequestType::HEAD)
+	if (methodType == eRequestType::GET)
 	{
-		if (statusCode != NOT_FOUND && methodType == eRequestType::HEAD)
-		{
-			body = "";
-		}
-		responseTemplate += "\r\n\r\n" + body;
+		responseTemplate = VERSION + statusCode + "\r\n"
+			+ CONTENT_TYPE + "text/html" + "\r\n"
+			+ CONTENT_LEN + bodyContentLength
+			+ "\r\n\r\n" 
+			+ body + "\r\n";
+	}
+	else if (methodType == eRequestType::HEAD)
+	{
+		responseTemplate = VERSION + statusCode + "\r\n"
+			+ CONTENT_TYPE + "text/html" + "\r\n"
+			/*+ CONTENT_LEN + requestInfo.len*/
+			+ "\r\n\r\n";
 	}
 	else if (methodType == eRequestType::OPTIONS)
 	{
 		string allow = "GET, TRACE, PUT, POST, HEAD, DELETE, OPTIONS";
 		responseTemplate = VERSION + statusCode + "\r\n"
-			+ ALLOW + allow + "\r\n"
-			+ CONTENT_LEN + "0" + "\r\n\r\n";
+						 + ALLOW + allow + "\r\n"
+						 + CONTENT_LEN + "0" + "\r\n\r\n";
 	}
 	else if (methodType == eRequestType::TRACE)
 	{
 		responseTemplate = VERSION + statusCode + "\r\n"
-			+ CONTENT_TYPE + "message/http" + "\r\n"
-			+ CONTENT_LEN + requestInfo.len
-			+ "\r\n\r\n";
+						 + CONTENT_TYPE + "message/http" + "\r\n"
+						 + CONTENT_LEN + requestInfo.len
+						 + "\r\n\r\n";
 	}
 	else if (methodType == eRequestType::POST)
 	{
 		body = "Printed in server's console:\n" + requestInfo.body;
+		bodyContentLength = to_string(body.length());
 		responseTemplate = VERSION + statusCode + "\r\n"
-			+ CONTENT_TYPE + "text/plain" + "\r\n"
-			+ CONTENT_LEN + to_string(body.length())
-			+ "\r\n\r\n"
-			+ body + "\r\n";
+						 + CONTENT_TYPE + "text/plain" + "\r\n"
+						 + CONTENT_LEN + bodyContentLength
+						 + "\r\n\r\n"
+						 + body + "\r\n";
 	}
 	else if (methodType == eRequestType::PUT || methodType == eRequestType::DEL)
 	{
 		responseTemplate = VERSION + statusCode + "\r\n"
-			+ CONTENT_TYPE + "text/plain" + "\r\n";
+						 + CONTENT_TYPE + "text/plain" + "\r\n";
 	}
 
 	return responseTemplate;
